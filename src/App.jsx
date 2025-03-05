@@ -12,7 +12,8 @@ import Loader from "./components/Loader";
 import ErrorMessage from "./components/ErrorMessage";
 import MovieDetails from "./components/MovieDetails";
 
-const KEY = "f84fc31d";
+const KEY = import.meta.env.VITE_OMDB_API_KEY;
+
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
@@ -52,16 +53,14 @@ export default function App() {
         try {
           setIsLoading(true);
           setError("");
-          const res = await fetch(
-            `https://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
-            { signal: controller.signal }
-          );
 
-          if (!res.ok)
-            throw new Error("Something went wrong with fetching movies");
+          const url = `https://www.omdbapi.com/?apikey=${KEY}&s=${query}`;
+          const res = await fetch(url);
 
+          if (!res.ok) throw new Error("Failed to fetch movies");
           const data = await res.json();
-          if (data.Response === "False") throw new Error("Movie not found");
+          if (data.Response === "False") throw new Error(data.Error);
+
           setMovies(data.Search);
           setError("");
         } catch (err) {
@@ -72,6 +71,7 @@ export default function App() {
           setIsLoading(false);
         }
       }
+
       if (query.length < 3) {
         setMovies([]);
         setError("");
