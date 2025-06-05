@@ -25,6 +25,15 @@ export default function App() {
     const storeValue = localStorage.getItem("watched");
     return storeValue ? JSON.parse(storeValue) : [];
   });
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth <= 600);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   function handleSelectMovie(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
@@ -94,7 +103,8 @@ export default function App() {
 
         <NumResult movies={movies} />
       </Navbar>
-      <Main>
+      <Main className={`main${isMobile && selectedId ? " show-details" : ""}`}>
+        
         <Box>
           {/* {isLoading ? (
             <Loader />
@@ -104,6 +114,7 @@ export default function App() {
           {isLoading && <Loader />}
           {!isLoading && !error && (
             <MovieList
+            className="box box-list" style={{ display: isMobile && selectedId ? "none" : "block" }}
               tempMovieData={tempMovieData}
               movies={movies}
               onSelectMovie={handleSelectMovie}
@@ -115,6 +126,7 @@ export default function App() {
         <Box>
           {selectedId ? (
             <MovieDetails
+            className="box box-details" style={{ display: isMobile && selectedId ? "block" : isMobile ? "none" : "block" }}
               selectedId={selectedId}
               onCloseMovie={handleCloseMovie}
               onAddWatched={handleAddWatched}
